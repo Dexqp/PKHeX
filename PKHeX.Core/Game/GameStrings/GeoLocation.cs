@@ -8,7 +8,7 @@ namespace PKHeX.Core;
 public static class GeoLocation
 {
     private static readonly string[]?[] CountryList = GetCountryList();
-    internal static readonly string[] lang_geo = { "ja", "en", "fr", "de", "it", "es", "zh", "ko", "zh2" };
+    private static readonly string[] lang_geo = { "ja", "en", "fr", "de", "it", "es", "zh", "ko", "zh2" };
     private static readonly string[]?[]?[] RegionList = new string[CountryList.Length][][];
 
     /// <summary>
@@ -31,12 +31,12 @@ public static class GeoLocation
         return UnpackList(input);
     }
 
-    private static string[]?[] UnpackList(string[] input)
+    private static string[]?[] UnpackList(ReadOnlySpan<string> input)
     {
         var last = GetEntry(input[^1], out var lastIndex);
         string[]?[] list = new string[lastIndex+1][];
         list[lastIndex] = last;
-        foreach (var line in input)
+        foreach (var line in input[..^1])
         {
             var entry = GetEntry(line, out var index);
             list[index] = entry;
@@ -46,7 +46,7 @@ public static class GeoLocation
 
     private static string[] GetEntry(string line, out int index)
     {
-        var entries = line.Split(',');
+        var entries = line.Split('\t');
         index = int.Parse(entries[0]);
         return entries;
     }
@@ -58,7 +58,7 @@ public static class GeoLocation
         if ((uint)country >= CountryList.Length)
             return INVALID;
         var countryNames = CountryList[country];
-        if (countryNames is not null && l < countryNames.Length)
+        if (countryNames is not null && (uint)l < countryNames.Length)
             return countryNames[l + 1];
         return INVALID;
     }
@@ -73,7 +73,7 @@ public static class GeoLocation
         if ((uint)region >= regionNames.Length)
             return INVALID;
         var localized = regionNames[region];
-        if (localized is not null && l < localized.Length)
+        if (localized is not null && (uint)l < localized.Length)
             return localized[l + 1];
         return INVALID;
     }

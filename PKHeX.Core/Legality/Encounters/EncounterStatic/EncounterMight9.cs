@@ -13,7 +13,11 @@ public sealed record EncounterMight9 : EncounterStatic, ITeraRaid9
     public byte Index { get; private init; }
     public byte Stars { get; private init; }
     public byte RandRate { get; private init; } // weight chance of this encounter
-    public byte Scale { get; init; }
+
+    /// <summary> Indicates how the <see cref="Scale"/> value is used, if at all. </summary>
+    public SizeType9 ScaleType { get; private init; }
+    /// <summary>  Used only for <see cref="ScaleType"/> == <see cref="SizeType9.VALUE"/> </summary>
+    public byte Scale { get; private init; }
 
     public ushort RandRate0MinScarlet { get; private init; }
     public ushort RandRate0MinViolet { get; private init; }
@@ -171,29 +175,30 @@ public sealed record EncounterMight9 : EncounterStatic, ITeraRaid9
         Stars = data[0x12],
         RandRate = data[0x13],
 
-        RandRate0MinScarlet = ReadUInt16LittleEndian(data[WeightStart..]),
-        RandRate0MinViolet = ReadUInt16LittleEndian(data[(WeightStart + sizeof(ushort))..]),
+        RandRate0MinScarlet   = ReadUInt16LittleEndian(data[WeightStart..]),
+        RandRate0MinViolet    = ReadUInt16LittleEndian(data[(WeightStart + sizeof(ushort))..]),
         RandRate0TotalScarlet = ReadUInt16LittleEndian(data[(WeightStart + (sizeof(ushort) * 2))..]),
-        RandRate0TotalViolet = ReadUInt16LittleEndian(data[(WeightStart + (sizeof(ushort) * 3))..]),
+        RandRate0TotalViolet  = ReadUInt16LittleEndian(data[(WeightStart + (sizeof(ushort) * 3))..]),
 
-        RandRate1MinScarlet = ReadUInt16LittleEndian(data[(WeightStart + (sizeof(ushort) * 4))..]),
-        RandRate1MinViolet = ReadUInt16LittleEndian(data[(WeightStart + (sizeof(ushort) * 5))..]),
+        RandRate1MinScarlet   = ReadUInt16LittleEndian(data[(WeightStart + (sizeof(ushort) * 4))..]),
+        RandRate1MinViolet    = ReadUInt16LittleEndian(data[(WeightStart + (sizeof(ushort) * 5))..]),
         RandRate1TotalScarlet = ReadUInt16LittleEndian(data[(WeightStart + (sizeof(ushort) * 6))..]),
-        RandRate1TotalViolet = ReadUInt16LittleEndian(data[(WeightStart + (sizeof(ushort) * 7))..]),
+        RandRate1TotalViolet  = ReadUInt16LittleEndian(data[(WeightStart + (sizeof(ushort) * 7))..]),
 
-        RandRate2MinScarlet = ReadUInt16LittleEndian(data[(WeightStart + (sizeof(ushort) * 8))..]),
-        RandRate2MinViolet = ReadUInt16LittleEndian(data[(WeightStart + (sizeof(ushort) * 9))..]),
+        RandRate2MinScarlet   = ReadUInt16LittleEndian(data[(WeightStart + (sizeof(ushort) * 8))..]),
+        RandRate2MinViolet    = ReadUInt16LittleEndian(data[(WeightStart + (sizeof(ushort) * 9))..]),
         RandRate2TotalScarlet = ReadUInt16LittleEndian(data[(WeightStart + (sizeof(ushort) * 10))..]),
-        RandRate2TotalViolet = ReadUInt16LittleEndian(data[(WeightStart + (sizeof(ushort) * 11))..]),
+        RandRate2TotalViolet  = ReadUInt16LittleEndian(data[(WeightStart + (sizeof(ushort) * 11))..]),
 
-        RandRate3MinScarlet = ReadUInt16LittleEndian(data[(WeightStart + (sizeof(ushort) * 12))..]),
-        RandRate3MinViolet = ReadUInt16LittleEndian(data[(WeightStart + (sizeof(ushort) * 13))..]),
+        RandRate3MinScarlet   = ReadUInt16LittleEndian(data[(WeightStart + (sizeof(ushort) * 12))..]),
+        RandRate3MinViolet    = ReadUInt16LittleEndian(data[(WeightStart + (sizeof(ushort) * 13))..]),
         RandRate3TotalScarlet = ReadUInt16LittleEndian(data[(WeightStart + (sizeof(ushort) * 14))..]),
-        RandRate3TotalViolet = ReadUInt16LittleEndian(data[(WeightStart + (sizeof(ushort) * 15))..]),
+        RandRate3TotalViolet  = ReadUInt16LittleEndian(data[(WeightStart + (sizeof(ushort) * 15))..]),
 
         Nature = (Nature)data[0x34],
         IVs = new IndividualValueSet((sbyte)data[0x35], (sbyte)data[0x36], (sbyte)data[0x37], (sbyte)data[0x38], (sbyte)data[0x39], (sbyte)data[0x3A], data[0x3B]),
-        Scale = data[0x3C],
+        ScaleType = (SizeType9)data[0x3C],
+        Scale = data[0x3D],
     };
 
     private static AbilityPermission GetAbility(byte b) => b switch
@@ -236,8 +241,6 @@ public sealed record EncounterMight9 : EncounterStatic, ITeraRaid9
                 return true;
         }
 
-        if (pk is IScaledSize3 s3 && s3.Scale != Scale)
-            return true;
         if (IVs.IsSpecified && !Legal.GetIsFixedIVSequenceValidSkipRand(IVs, pk))
             return true;
 
@@ -248,7 +251,7 @@ public sealed record EncounterMight9 : EncounterStatic, ITeraRaid9
             return true;
 
         byte gender = GetGender();
-        var param = new GenerateParam9(Species, gender, FlawlessIVCount, 1, 0, 0, Scale, Ability, Shiny, Nature, IVs);
+        var param = new GenerateParam9(Species, gender, FlawlessIVCount, 1, 0, 0, ScaleType, Scale, Ability, Shiny, Nature, IVs);
         if (!Encounter9RNG.IsMatch(pk, param, seed))
             return true;
         return base.IsMatchPartial(pk);
@@ -270,7 +273,7 @@ public sealed record EncounterMight9 : EncounterStatic, ITeraRaid9
         const byte undefinedSize = 0;
         byte gender = GetGender();
         var param = new GenerateParam9(Species, gender, FlawlessIVCount, rollCount,
-            undefinedSize, undefinedSize, Scale,
+            undefinedSize, undefinedSize, ScaleType, Scale,
             Ability, Shiny, Nature, IVs);
 
         var init = Util.Rand.Rand64();

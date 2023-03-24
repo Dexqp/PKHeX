@@ -214,7 +214,13 @@ public abstract class GBPKM : PKM
 
     protected static ushort GetStat(int baseStat, int iv, int effort, int level)
     {
-        effort = (ushort)Math.Min(255, Math.Sqrt(effort) + 1) >> 2;
+        // The games store a precomputed ushort[256] i*i table for all ushort->byte square root calcs.
+        // The game then iterates to find the lowest index with a value >= input (effort).
+        // With modern CPUs we can just call sqrt->ceil directly.
+        // ceil(sqrt(65535)) evals to 256, but we're clamped to byte only.
+        byte firstSquare = (byte)Math.Min(255, Math.Ceiling(Math.Sqrt(effort)));
+
+        effort = firstSquare >> 2;
         return (ushort)((((2 * (baseStat + iv)) + effort) * level / 100) + 5);
     }
 

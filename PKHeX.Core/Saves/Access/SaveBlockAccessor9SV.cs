@@ -565,10 +565,12 @@ public sealed class SaveBlockAccessor9SV : SCBlockAccessor, ISaveBlock9Main
     private const uint FSYS_RAID_DIFFICTLTY5_SURVEY = 0x48A247BA;
     private const uint FSYS_RAID_DIFFICTLTY6_SURVEY = 0xAD1DC231;
     private const uint FSYS_NETCONTENTS_OFF = 0x9AB093F2;
-
-    private const uint FSYS_VIVILLON = 0x22F70BCF; // real name todo
+    
     private const uint FSYS_GO_LINK_ENABLED = 0x3ABC21E3; // real name todo
-    private const uint KGoTransfer = 0x7EE0A576;
+    private const uint KGOTransfer = 0x7EE0A576;
+    private const uint KGOVivillonForm = 0x22F70BCF; // FSYS_VIVILLON
+    private const uint KGOVivillonFormEnabled = 0x0C125D5C;
+    private const uint KGOVivillonExpiration = 0x867F0240; // Unix time stamp for when Vivillon resets to default form
 
     #endregion
 
@@ -980,6 +982,8 @@ public sealed class SaveBlockAccessor9SV : SCBlockAccessor, ISaveBlock9Main
     #endregion
 
     #region EncountOutbreakSave
+    private const uint KMassOutbreakNumActive     = 0x6C375C8A;
+
     private const uint KMassOutbreak01CenterPos   = 0x2ED42F4D; // EncountOutbreakSave_centerPos[0]
     private const uint KMassOutbreak01DummyPos    = 0x4A13BE7C; // EncountOutbreakSave_dummyPos[0]
     private const uint KMassOutbreak01Species     = 0x76A2F996; // EncountOutbreakSave_monsno[0]

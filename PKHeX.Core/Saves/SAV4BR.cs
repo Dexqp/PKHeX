@@ -12,7 +12,7 @@ public sealed class SAV4BR : SaveFile
     protected internal override string ShortSummary => $"{Version} #{SaveCount:0000}";
     public override string Extension => string.Empty;
     public override PersonalTable4 Personal => PersonalTable.DP;
-    public override IReadOnlyList<ushort> HeldItems => Legal.HeldItems_DP;
+    public override ReadOnlySpan<ushort> HeldItems => Legal.HeldItems_DP;
 
     private const int SAVE_COUNT = 4;
     public const int SIZE_HALF = 0x1C0000;
@@ -200,16 +200,21 @@ public sealed class SAV4BR : SaveFile
     private int BoxName = -1;
     private const int BoxNameLength = 0x28;
 
+    private Span<byte> GetBoxNameSpan(int box)
+    {
+        int ofs = BoxName + (box * BoxNameLength);
+        return Data.AsSpan(ofs, BoxNameLength);
+    }
+
     public override string GetBoxName(int box)
     {
         if (BoxName < 0)
             return $"BOX {box + 1}";
 
-        int ofs = BoxName + (box * BoxNameLength);
-        var span = Data.AsSpan(ofs, BoxNameLength);
+        var span = GetBoxNameSpan(box);
         if (ReadUInt16BigEndian(span) == 0)
             return $"BOX {box + 1}";
-        return GetString(ofs, BoxNameLength);
+        return GetString(span);
     }
 
     public override void SetBoxName(int box, ReadOnlySpan<char> value)
@@ -217,8 +222,7 @@ public sealed class SAV4BR : SaveFile
         if (BoxName < 0)
             return;
 
-        int ofs = BoxName + (box * BoxNameLength);
-        var span = Data.AsSpan(ofs, BoxNameLength);
+        var span = GetBoxNameSpan(box);
         if (ReadUInt16BigEndian(span) == 0)
             return;
 

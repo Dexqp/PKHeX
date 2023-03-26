@@ -87,7 +87,7 @@ public sealed class SAV8LA : SaveFile, ISaveBlock8LA, ISCBlockArray, ISaveFileRe
     protected override byte[] GetFinalData() => SwishCrypto.Encrypt(AllBlocks);
 
     public override PersonalTable8LA Personal => PersonalTable.LA;
-    public override IReadOnlyList<ushort> HeldItems => Legal.HeldItems_LA;
+    public override ReadOnlySpan<ushort> HeldItems => Legal.HeldItems_LA;
 
     protected override SAV8LA CloneInternal()
     {
@@ -130,8 +130,8 @@ public sealed class SAV8LA : SaveFile, ISaveBlock8LA, ISCBlockArray, ISaveFileRe
     public override int PlayedMinutes { get => Played.PlayedMinutes; set => Played.PlayedMinutes = (byte)value; }
     public override int PlayedSeconds { get => Played.PlayedSeconds; set => Played.PlayedSeconds = (byte)value; }
 
-    protected override byte[] BoxBuffer => BoxInfo.Data;
-    protected override byte[] PartyBuffer => PartyInfo.Data;
+    protected override Span<byte> BoxBuffer => BoxInfo.Data;
+    protected override Span<byte> PartyBuffer => PartyInfo.Data;
 
     private void Initialize()
     {

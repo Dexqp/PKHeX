@@ -54,7 +54,7 @@ public sealed class SAV9SV : SaveFile, ISaveBlock9Main, ISCBlockArray, ISaveFile
     protected override byte[] GetFinalData() => SwishCrypto.Encrypt(AllBlocks);
 
     public override PersonalTable9SV Personal => PersonalTable.SV;
-    public override IReadOnlyList<ushort> HeldItems => Legal.HeldItems_SV;
+    public override ReadOnlySpan<ushort> HeldItems => Legal.HeldItems_SV;
 
     #region Blocks
     public SCBlockAccessor Accessor => Blocks;
@@ -217,10 +217,10 @@ public sealed class SAV9SV : SaveFile, ISaveBlock9Main, ISCBlockArray, ISaveFile
         protected set => PartyInfo.PartyCount = value;
     }
 
-    protected override byte[] BoxBuffer => BoxInfo.Data;
-    protected override byte[] PartyBuffer => PartyInfo.Data;
+    protected override Span<byte> BoxBuffer => BoxInfo.Data;
+    protected override Span<byte> PartyBuffer => PartyInfo.Data;
     public override PK9 GetDecryptedPKM(byte[] data) => GetPKM(DecryptPKM(data));
-    public override PK9 GetBoxSlot(int offset) => GetDecryptedPKM(GetData(BoxInfo.Data, offset, SIZE_PARTY)); // party format in boxes!
+    public override PK9 GetBoxSlot(int offset) => GetDecryptedPKM(BoxInfo.Data.AsSpan(offset, SIZE_PARTY).ToArray()); // party format in boxes!
 
     //public int GetRecord(int recordID) => Records.GetRecord(recordID);
     //public void SetRecord(int recordID, int value) => Records.SetRecord(recordID, value);

@@ -195,6 +195,7 @@ public sealed class MiscVerifier : Verifier
         (int)Species.Chespin, // Chespin
         (int)Species.Fennekin, // Fennekin
         (int)Species.Carbink, // Carbink
+        (int)Species.Rowlet, // Rowlet
         (int)Species.Grookey, // Grookey
         (int)Species.Sobble, // Sobble
 
